@@ -1,3 +1,4 @@
+# import the libraries we need
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.datasets import fetch_openml
@@ -13,30 +14,32 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.multioutput import ClassifierChain
 from sklearn.model_selection import GridSearchCV
+# get the data and plot it + split it
 mnist = fetch_openml('mnist_784' , as_frame = False)
 #print(type(mnist)) #<class 'sklearn.utils._bunch.Bunch'>
 x : np.ndarray = mnist.data 
 y : np.ndarray = mnist.target
 
-def plot_digit(image_data):
+def plot_digit(image_data): # draw an image
     image = image_data.reshape(28,28)
     plt.imshow(image , cmap='binary')
     plt.axis('off')
 
-def plot_digits(data):
+def plot_digits(data): # draw a lot of images
     plt.figure(figsize=(9,9))
     for idx , image_data in enumerate(data):
         plt.subplot(5 , 10 , idx + 1 )
         plot_digit(image_data)
     plt.subplots_adjust(wspace=0 , hspace=0)
 
-# splite data to  Xtrain , Ytrain , xtest , ytestu
+# splite data to  Xtrain , Ytrain , xtest , ytest
 x_train , y_train , x_test , y_test = x[:60000] , y[:60000] , x[60000:] , y[60000:]
-y_train_5 = (y_train == '5')
+
+y_train_5 = (y_train == '5') # we just will get number 5 to create initial classifier (binary_classifier)
 y_test_5 = (y_test == '5')
 some_digit = x_train[0]
 
-#draw_data
+# draw_data some data
 '''
 [In] plot_digit(x_train[0])
 [Out] figure have data in this case will draw 5
@@ -51,8 +54,9 @@ def SGD_clasifier(): # extra func
     sgd_cls = SGDClassifier(random_state = 42)                               
     sgd_cls.fit(x_train , y_train_5) # to fit the model                      
     print(sgd_cls.get_params()) # to understand his hyperparam
-    sgd_cross = cross_val_score(sgd_cls , x_train , y_train_5 , cv=3 , scoring = 'accuracy') # as we use that before and our score = accuracy (دقه)
+    sgd_cross = cross_val_score(sgd_cls , x_train , y_train_5 , cv=3 , scoring = 'accuracy') # we will use cross_val to overcome at overfitting and return the best score
     sgd_cross_pre = cross_val_predict(sgd_cls , x_train , y_train_5 , cv=3) # like cross_val_score but this will not give you scoring  , will give predictions
+    
     print(confusion_mtrx := confusion_matrix(y_train_5 , sgd_cross_pre)) # give you confusion_matrix will give you 2D arrray [top left {TN} , top rghit {FP} , lower left {FN} , lower right {TP}]
     print(precision_score(y_train_5 , sgd_cross_pre)) # return precision
     print(recall_score(y_train_5 , sgd_cross_pre)) # return recall
@@ -83,7 +87,7 @@ def SGD_clasifier(): # extra func
         plt.ylabel('precision')
         plt.axis([0,1,0,1])
         plt.show()
-    
+    # if you not accept at precision you can control it using threhold as you see
     idx_for_90_precision = (precision >= 0.90).argmax()   # get first index will make precision == 90%
     threhold_for_90_pre = therholds[idx_for_90_precision] # get this threhold that will make the precision == 90%
     y_train_with_90_pre = (y_socres >= threhold_for_90_pre) # will down or up the threhold as you write ( in this case will up the threhold to make the precision more high)
@@ -99,13 +103,14 @@ def finall_binary_classifier():
 [In] finall_binary_classifier()
 [Out] [True , False ,.........]
 '''
+# now we will train our models on all data (multi class)
 def svc_classifier_multi():
     svc_classifirer = SVC(random_state = 42)
     svc_classifirer.fit(x_train[:3000] , y_train[:3000]) # feed the classifier
     print(svc_classifirer.predict([some_digit])) # will give us a perdictons
-    #here we will get raito of all classifiers has been  feeded
+    #here we will get ratio of all classifiers has been  feeded
     '''
-    score_digit = svc_classifirer.decision_function([some_digit[0]]) # return raito of confidence will return raito from all class and get high confidence ratio and classed it on this base
+    score_digit = svc_classifirer.decision_function([some_digit[0]]) # return ratio of confidence will return ratio from all class and get high confidence ratio and classed it on this base
     class_id = score_digit.argmax() # will get index of high raito
     print(svc_classifirer.classes_) # will return all values be classed
     print(svc_classifirer.classes_[class_id]) # return the classed obj
@@ -115,6 +120,7 @@ def svc_classifier_multi():
 [In] svc_classifier_multi()
 [Out] 5 as we expected
 '''
+
 def control_as_we_want_ovo_or_ovr():  # extra_func
     one_vs_rest = OneVsRestClassifier(SVC(random_state = 42)) # this method will bulid 10 models and get most raito in all predict and classed it on this base   
     one_vs_one = OneVsOneClassifier(SVC(random_state = 42)) # this method will bulid N * (N-1)/2 in our case will train 45 models 10 *(10-1) /2
@@ -128,24 +134,27 @@ def control_as_we_want_ovo_or_ovr():  # extra_func
 
 def sgd_with_error_analysis(): # extra_func
 
-    # here will will analysis where our model make mistake
+    # here will will analysis where our model make mistakes
     sgd_cls = SGDClassifier(random_state=42) # or any classifier
     scaler = StandardScaler()
     scaled_x = scaler.fit_transform(x_train.astype('float64'))
+    
     y_train_pred = cross_val_predict(sgd_cls , scaled_x , y_train , cv=3 )
+    
     #print(f'without_scale = {cross_val_score(sgd_cls , x_train , y_train , scoring ="accuracy" )}') # [0.88083333  , 0.88325 , 0.88116667 , 0.86625 , 0.8875]
-    #print(f'without_scale = {cross_val_score(sgd_cls , scaled_x , y_train , scoring ="accuracy" , cv=3 )}') # [0.89733333 , 0.88725 , 0.89583333 , 0.89233333 , 0.90516667]
+    #print(f'with_scale = {cross_val_score(sgd_cls , scaled_x , y_train , scoring ="accuracy" , cv=3 )}') # [0.89733333 , 0.88725 , 0.89583333 , 0.89233333 , 0.90516667]
+    
     sample_weight = (y_train_pred != y_train)
-    print(sample_weight)
+    
     plt.figure(figsize=(12 , 10))
     ConfusionMatrixDisplay.from_predictions(y_train , y_train_pred) # get raito of all true labels in main digonal
-    ConfusionMatrixDisplay.from_predictions(y_train , y_train_pred , normalize='true' , values_format='.0%')
-    ConfusionMatrixDisplay.from_predictions(y_train , y_train_pred , normalize='true', sample_weight=sample_weight , values_format='.0%')
+    ConfusionMatrixDisplay.from_predictions(y_train , y_train_pred , normalize='true' , values_format='.0%') # another type (prefer)
+    ConfusionMatrixDisplay.from_predictions(y_train , y_train_pred , normalize='true', sample_weight=sample_weight , values_format='.0%') # another type (prefer) but is more complex
     plt.show()  
 
 def try_to_get_more_accuracy(): # extra_func * important cuz this will give us best estimator
     #here we will promote KNN classifier to get 97% accuracy 
-    num_of_digits = 60000 # as you want but take care about you computer (i suggest put 15000 then put more untill you computer be slow)
+    num_of_digits = 60000 # as you want but take care about you computer (I suggest put 15000 then put more untill your computer be slow)
     param_grid = {
         'n_neighbors':[3,4,6],
         'weights':['uniform', 'distance']
