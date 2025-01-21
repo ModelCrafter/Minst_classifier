@@ -78,9 +78,10 @@ The following libraries are used in the project:
 ---
 ### Developer
 
-Youssef Khaled
+***Youssef Khaled***
 
 
 
 This project provides a comprehensive overview of building, analyzing, and optimizing classifiers for the MNIST dataset.
+
 
