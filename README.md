@@ -75,6 +75,9 @@ The following libraries are used in the project:
 - Error analysis via confusion matrices.
 - Accuracy improvement for `KNeighborsClassifier` using grid search.
 
+## License
+This project is licensed under the Apache License 2.0.
+
 ---
 ### Developer
 
