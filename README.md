@@ -76,6 +76,11 @@ The following libraries are used in the project:
 - Accuracy improvement for `KNeighborsClassifier` using grid search.
 
 ---
+### Developer
+
+Youssef Khaled
+
+
 
 This project provides a comprehensive overview of building, analyzing, and optimizing classifiers for the MNIST dataset.
 
